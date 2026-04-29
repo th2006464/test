@@ -1,0 +1,67 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft Activation Scripts (MAS)</title>
+    <link rel="stylesheet" href="https://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css">
+    <style>
+        html, body {
+            height: 100%; /* 设置整个页面高度为 100% */
+        }
+        .full-height {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container full-height">
+        <div class="panel panel-info">
+            <div class="panel-body">
+                <h1 class="text-center">Microsoft Activation Scripts (MAS)</h1>
+                <p class="text-center">
+                    Powershell代码: 
+                    <code>irm https://mas.foxtang.com | iex</code>
+                </p>
+                <div class="text-center">
+                    <button class="btn btn-primary" onclick="copyMain()">点击复制代码</button>
+                    <button class="btn btn-success" onclick="copyBackup()">备用连接</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyMain() {
+            const textToCopy = "irm https://mas.foxtang.com | iex";
+            copyText(textToCopy);
+        }
+
+        function copyBackup() {
+            const textToCopy = "irm https://get.activated.win | iex";
+            copyText(textToCopy);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert("已成功复制到剪贴板");
+                })
+                .catch((err) => {
+                    console.error('复制失败: ', err);
+                    alert("复制失败，请手动复制");
+                });
+        }
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"b9a3ddf9e9344073baa2ed6a31c200a5","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+
+</html>
