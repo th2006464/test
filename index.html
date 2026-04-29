@@ -1,41 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>测试页面</title>
-    <link rel="stylesheet" href="https://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.min.css">
+    <title>访问测试</title>
     <style>
         html, body {
             height: 100%;
             margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
-        .full-height {
+        .wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100%;
+            background: #f8f9fa;
         }
-        .success-box {
+        .card {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             text-align: center;
-            padding: 30px;
+            max-width: 400px;
         }
         .checkmark {
-            font-size: 48px;
+            font-size: 42px;
             color: #5cb85c;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
+        .ip {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .hint {
+            color: #888;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .loading { color: #aaa; }
+        .error { color: #d9534f; font-size: 14px; }
     </style>
 </head>
-
 <body>
-    <div class="container full-height">
-        <div class="success-box">
+    <div class="wrapper">
+        <div class="card">
             <div class="checkmark">✓</div>
             <h3>这是一个测试页面，你可以正确访问了</h3>
+            <div>你的 IP 地址：</div>
+            <div id="ip" class="ip loading">获取中...</div>
+            <div class="hint" id="hint"></div>
         </div>
     </div>
-</body>
 
+    <script>
+        // 使用 ipwho.is (无需 key，支持 CORS，返回字段清晰)
+        fetch('https://ipwho.is/')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('ip').textContent = data.ip;
+                    document.getElementById('ip').className = 'ip';
+                    // 可选：显示国家/城市（按需启用）
+                    // document.getElementById('hint').textContent = `${data.country} · ${data.city}`;
+                } else {
+                    throw new Error('API 返回失败');
+                }
+            })
+            .catch(err => {
+                console.error('IP 获取失败:', err);
+                document.getElementById('ip').textContent = '获取失败';
+                document.getElementById('ip').className = 'ip error';
+                document.getElementById('hint').textContent = '可能因网络或 API 限制';
+            });
+    </script>
+</body>
 </html>
