@@ -24,7 +24,7 @@
             border-radius: 12px;
             box-shadow: 0 6px 24px rgba(0,0,0,0.06);
             text-align: center;
-            max-width: 360px;
+            max-width: 400px;
             width: 100%;
         }
         .checkmark {
@@ -36,22 +36,26 @@
         .title {
             font-size: 16px;
             color: #333;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
-        .label {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 6px;
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 14px;
         }
-        .ip {
-            font-size: 18px;
-            font-weight: 600;
+        .item:last-child { border-bottom: none; }
+        .label { color: #888; margin-right: 12px; }
+        .value {
+            font-weight: 500;
             color: #222;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            text-align: right;
             word-break: break-all;
         }
+        .ip { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
         .loading { color: #aaa; }
-        .error { color: #d9534f; font-size: 14px; }
+        .error { color: #d9534f; }
     </style>
 </head>
 <body>
@@ -59,27 +63,48 @@
         <div class="card">
             <div class="checkmark">✓</div>
             <div class="title">这是一个测试页面，你可以正确访问了</div>
-            <div class="label">当前访问 IP</div>
-            <div id="ip" class="ip loading">···</div>
+            
+            <div class="item">
+                <span class="label">IP 地址</span>
+                <span id="ip" class="value ip loading">···</span>
+            </div>
+            <div class="item">
+                <span class="label">国家/地区</span>
+                <span id="country" class="value loading">···</span>
+            </div>
+            <div class="item">
+                <span class="label">城市</span>
+                <span id="city" class="value loading">···</span>
+            </div>
         </div>
     </div>
 
     <script>
-        fetch('https://api.ipify.org?format=json')
-            .then(res => {
-                if (!res.ok) throw new Error('请求失败');
-                return res.json();
-            })
+        fetch('https://ipwho.is/')
+            .then(res => res.json())
             .then(data => {
-                const ipEl = document.getElementById('ip');
-                ipEl.textContent = data.ip || '未知';
-                ipEl.className = 'ip';
+                if (data.success) {
+                    document.getElementById('ip').textContent = data.ip;
+                    document.getElementById('country').textContent = 
+                        `${data.country_flag} ${data.country}`;
+                    document.getElementById('city').textContent = 
+                        data.city || '—';
+                    
+                    // 移除 loading 样式
+                    ['ip','country','city'].forEach(id => {
+                        document.getElementById(id).className = 'value';
+                    });
+                } else {
+                    throw new Error('API 返回失败');
+                }
             })
             .catch(err => {
-                console.error('IP 获取失败:', err);
-                const ipEl = document.getElementById('ip');
-                ipEl.textContent = '获取失败';
-                ipEl.className = 'ip error';
+                console.error('位置获取失败:', err);
+                ['ip','country','city'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.textContent = '获取失败';
+                    el.className = 'value error';
+                });
             });
     </script>
 </body>
