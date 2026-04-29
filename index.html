@@ -41,7 +41,7 @@
         .item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px dashed #eee;
             font-size: 14px;
         }
@@ -54,8 +54,8 @@
             word-break: break-all;
             flex: 1;
         }
-        .ip { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-        .loading { color: #aaa; }
+        .ip { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #007bff; }
+        .loading { color: #aaa; font-style: italic; }
         .error { color: #d9534f; }
         .hint {
             margin-top: 15px;
@@ -69,89 +69,82 @@
     <div class="wrapper">
         <div class="card">
             <div class="checkmark">✓</div>
-            <div class="title">这是一个测试页面，你可以正确访问了</div>
+            <div class="title">网络连接测试</div>
             
             <div class="item">
                 <span class="label">IP 地址</span>
-                <span id="ip" class="value ip loading">···</span>
+                <span id="ip" class="value ip loading">获取中...</span>
             </div>
             <div class="item">
                 <span class="label">国家/地区</span>
-                <span id="country" class="value loading">···</span>
+                <span id="country" class="value loading">获取中...</span>
             </div>
             <div class="item">
                 <span class="label">城市</span>
-                <span id="city" class="value loading">···</span>
+                <span id="city" class="value loading">获取中...</span>
             </div>
-            <div class="hint" id="hint"></div>
+            <div class="hint" id="hint">正在连接全球位置服务器...</div>
         </div>
     </div>
 
     <script>
-        // 降级策略：优先 ipapi.co → 失败则试 ipwho.is → 都失败则仅显示 IP（ipify）
+        const setVal = (id, val, isErr = false) => {
+            const el = document.getElementById(id);
+            el.textContent = val;
+            el.className = 'value' + (id === 'ip' ? ' ip' : '') + (isErr ? ' error' : '');
+        };
+
         async function fetchLocation() {
-            const APIs = [
-                { name: 'ipapi.co', url: 'https://ipapi.co/json/' },
-                { name: 'ipwho.is', url: 'https://ipwho.is/' }
-            ];
-            
-            for (const api of APIs) {
-                try {
-                    const res = await fetch(api.url, { timeout: 5000 });
-                    if (!res.ok) continue;
-                    const data = await res.json();
-                    
-                    // 适配不同 API 的返回结构
-                    if (api.name === 'ipapi.co' && data.ip) {
-                        return {
-                            ip: data.ip,
-                            country: `${data.country_name || ''}`,
-                            city: data.city || '',
-                            flag: '' // ipapi.co 不直接返回 flag
-                        };
-                    }
-                    if (api.name === 'ipwho.is' && data.success) {
-                        return {
-                            ip: data.ip,
-                            country: `${data.country_flag || ''} ${data.country || ''}`.trim(),
-                            city: data.city || '',
-                            flag: data.country_flag
-                        };
-                    }
-                } catch (e) {
-                    console.warn(`${api.name} 请求失败:`, e);
-                    continue;
-                }
-            }
-            // 全部失败：仅获取 IP
+            // 策略 1: 优先尝试 ip-api.com (国内访问较稳，不限HTTPS)
             try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                return { ip: data.ip, country: '—', city: '—', partial: true };
-            } catch {
+                const response = await fetch('https://demo.ip-api.com/json/?lang=zh-CN');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    return {
+                        ip: data.query,
+                        country: data.country,
+                        city: data.city,
+                        hint: '数据来自 IP-API'
+                    };
+                }
+            } catch (e) { console.log('Primary API failed, trying backup...'); }
+
+            // 策略 2: 备选 ipwho.is
+            try {
+                const response = await fetch('https://ipwho.is/?lang=zh-CN');
+                const data = await response.json();
+                if (data.success) {
+                    return {
+                        ip: data.ip,
+                        country: `${data.country_flag || ''} ${data.country}`,
+                        city: data.city,
+                        hint: '数据来自 IPWhois'
+                    };
+                }
+            } catch (e) { console.log('Backup API failed, trying Cloudflare...'); }
+
+            // 策略 3: 最后保底方案 (Cloudflare Trace - 仅能稳定拿IP)
+            try {
+                const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
+                const text = await response.text();
+                const ip = text.match(/ip=(.*)\n/)[1];
+                return { ip, country: '未知', city: '未知', hint: '仅获取到IP，位置查询超载' };
+            } catch (e) {
                 return null;
             }
         }
 
-        // 执行获取 + 渲染
         (async () => {
             const result = await fetchLocation();
-            const setVal = (id, val, isErr = false) => {
-                const el = document.getElementById(id);
-                el.textContent = val;
-                el.className = 'value' + (isErr ? ' error' : '');
-            };
-
+            
             if (result) {
                 setVal('ip', result.ip);
-                setVal('country', result.country || '—');
-                setVal('city', result.city || '—');
-                if (result.partial) {
-                    document.getElementById('hint').textContent = 'ℹ️ 位置信息获取受限，仅显示 IP';
-                }
+                setVal('country', result.country);
+                setVal('city', result.city);
+                document.getElementById('hint').textContent = `✅ ${result.hint}`;
             } else {
-                ['ip','country','city'].forEach(id => setVal(id, '获取失败', true));
-                document.getElementById('hint').textContent = '🔍 请检查网络连接，或稍后刷新重试';
+                ['ip','country','city'].forEach(id => setVal(id, '查询失败', true));
+                document.getElementById('hint').textContent = '❌ 无法获取网络信息，请检查防火墙设置';
             }
         })();
     </script>
