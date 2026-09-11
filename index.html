@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f4f7fb"><meta name="description" content="检测不同目标实际使用的公网出口 IP"><title>网络出口检测</title>
 <style>
+/* 桌面：五个检测面板一行；网络模式与 IP 协议各占半行 */
+body .stack{grid-template-columns:repeat(10,minmax(0,1fr))!important}.stack>[data-card]{grid-column:span 2}.summary,.summary+.card{grid-column:span 5!important}.retry{grid-column:1/-1!important}@media(max-width:1100px){body .stack{grid-template-columns:repeat(2,minmax(0,1fr))!important}.stack>[data-card],.summary,.summary+.card{grid-column:auto!important}.retry{grid-column:1/-1!important}}@media(max-width:600px){body .stack{grid-template-columns:1fr!important}.stack>[data-card],.summary,.summary+.card,.retry{grid-column:1!important}}
 .summary+.card{grid-column:1/-1}
 /* 四个主检测面板固定为 2×2；摘要与协议面板保持通栏 */
 .stack{grid-template-columns:repeat(2,minmax(0,1fr))!important}.card{min-width:0;padding:15px!important}.summary,.protocol-card,.retry{grid-column:1/-1}.details{grid-template-columns:1fr!important}.head{gap:8px!important}.icon{flex:0 0 36px;width:36px!important;height:36px!important}.title{min-width:0}.title h2{font-size:15px!important}.status{font-size:10px!important}.ip{font-size:clamp(14px,3.7vw,19px)!important}.label{font-size:10px!important}.value{font-size:12px!important}@media(max-width:370px){.app{padding-inline:10px!important}.stack{gap:8px!important}.card{padding:12px!important}.head{align-items:flex-start!important;flex-wrap:wrap}.status{width:100%}}
