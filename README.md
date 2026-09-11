@@ -14,6 +14,7 @@
 | 国内 | `myip.ipip.net/json` | IPIP 文本、IPInfo |
 | 国际 | `api64.ipify.org` | ident.me、icanhazip |
 | Google 可达性 | `www.google.com/generate_204` | 只判断实际连接成功/失败，不伪造出口 IP |
+| Google 规则出口（参考） | `sspanel.net/cdn-cgi/trace` | 与 ip111.cn 的“谷歌测试”使用相同规则域名 |
 | 协议 | `api4.ipify.org` / `api6.ipify.org` | — |
 
 请求禁用缓存且有 5 秒超时；某一接口失败不会中断其他卡片。HTTP 延迟不是 ICMP Ping。地理信息失败时仍显示 IP。
@@ -25,6 +26,7 @@
 ## 已知限制
 
 - Google 官方没有提供可供任意网页跨域读取的访客出口 IP 回显接口，因此页面只实际检测 Google 可达性和 HTTP 耗时，不声称能取得 Google 出口 IP。
+- “Google 规则出口”沿用 ip111.cn 的 `sspanel.net` 规则域名，但改用其开放 CORS 的 Cloudflare Trace 端点直接读取 IP。只有用户的代理规则让该域名与 Google 走同一线路时，结果才具有参考价值，它并非 Google 官方检测。
 - 国内/国际出口结果取决于代理软件对探针域名的规则，不代表服务器物理位置或精确规则。
 - 免费接口可能限流、失效或调整 CORS；国内 fallback 不保证仍命中同类国内规则。
 - DNS、CDN 和 IPv4/IPv6 连接策略会影响结果；三个线路返回的 IP 协议不一致时，页面不会强行比较；地理、ASN、ISP 数据可能有误差。
