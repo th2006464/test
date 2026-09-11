@@ -20,7 +20,7 @@
 
 ## 部署
 
-本仓库可直接启用 GitHub Pages（`main` 分支根目录），也可运行 `npx wrangler deploy` 部署到 Cloudflare Workers Static Assets。`wrangler.jsonc` 已绑定 `ip.foxtang.com`。
+本仓库可直接启用 GitHub Pages（`main` 分支根目录），也可运行 `npx wrangler deploy` 部署到 Cloudflare Workers Static Assets。`wrangler.jsonc` 通过 Worker Route 接管 `ip.foxtang.com/*`，并保留该主机现有 DNS 记录。
 
 ## 已知限制
 
