@@ -1,103 +1,27 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudflare 访问测试</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: -apple-system, system-ui, sans-serif;
-            background: #f0f2f5;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-        }
-        .icon { font-size: 48px; margin-bottom: 10px; }
-        .title { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 20px; }
-        .item {
-            display: flex;
-            justify-content: space-between;
-            margin: 12px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 8px;
-        }
-        .label { color: #666; }
-        .value { color: #007aff; font-weight: 500; font-family: monospace; }
-        .hint { font-size: 12px; color: #999; margin-top: 20px; }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <div class="icon">☁️</div>
-        <div class="title">Cloudflare 节点追踪</div>
-        
-        <div class="item">
-            <span class="label">IP 地址</span>
-            <span id="ip" class="value">正在获取...</span>
-        </div>
-        <div class="item">
-            <span class="label">国家/地区</span>
-            <span id="country" class="value">正在获取...</span>
-        </div>
-        <div class="item">
-            <span class="label">数据节点</span>
-            <span id="colo" class="value">正在获取...</span>
-        </div>
-
-        <div class="hint">此数据直接由 Cloudflare 边缘节点提供</div>
-    </div>
-
-    <script>
-        async function getCloudflareTrace() {
-            try {
-                const response = await fetch('https://www.cloudflare.com/cdn-cgi/trace');
-                const text = await response.text();
-                
-                // 将返回的文本转换成对象
-                const data = text.split('\n').reduce((obj, line) => {
-                    const [key, value] = line.split('=');
-                    if (key) obj[key] = value;
-                    return obj;
-                }, {});
-
-                // 1. 显示 IP
-                document.getElementById('ip').textContent = data.ip;
-
-                // 2. 将国家代码转换为中文名称 (例如: CN -> 中国)
-                try {
-                    const regionNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' });
-                    const countryName = regionNames.of(data.loc);
-                    document.getElementById('country').textContent = countryName + ' (' + data.loc + ')';
-                } catch (e) {
-                    document.getElementById('country').textContent = data.loc;
-                }
-
-                // 3. 显示 Cloudflare 数据中心代码 (例如: HKG 代表香港)
-                document.getElementById('colo').textContent = data.colo;
-
-            } catch (error) {
-                console.error('Fetch failed:', error);
-                document.querySelectorAll('.value').forEach(el => {
-                    el.textContent = '获取失败';
-                    el.style.color = 'red';
-                });
-            }
-        }
-
-        getCloudflareTrace();
-    </script>
-</body>
-</html>
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f4f7fb"><meta name="description" content="检测不同目标实际使用的公网出口 IP"><title>网络出口检测</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#162033;--muted:#738095;--line:#e7edf5;--blue:#1473e6;--green:#149d69;--red:#d94343}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#dbeaff,transparent 35%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}.app{width:min(100%,520px);margin:auto;padding:38px 16px calc(38px + env(safe-area-inset-bottom))}.hero{text-align:center;margin-bottom:22px}.logo{display:grid;place-items:center;width:60px;height:60px;margin:auto;border-radius:20px;background:linear-gradient(145deg,#3188f1,#1166d1);box-shadow:0 12px 25px #1473e63d;font-size:29px}.hero h1{margin:13px 0 5px;font-size:25px}.hero p,.sub{margin:0;color:var(--muted);font-size:12px}.stack{display:grid;gap:12px}.card{background:var(--card);border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 12px 34px #1f395a12;padding:18px}.head{display:flex;align-items:center;gap:11px;margin-bottom:15px}.icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#edf5ff;font-size:20px}.title{flex:1}.title h2{font-size:16px;margin:0 0 3px}.status{display:flex;align-items:center;gap:6px;color:var(--blue);font-size:12px;font-weight:700}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}.loading:before{animation:pulse 1.2s infinite}.ok{color:var(--green)}.error{color:var(--red)}.ip{display:block;width:100%;border:0;padding:0;background:transparent;text-align:left;color:var(--blue);font:650 clamp(18px,5.4vw,24px)/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere;cursor:pointer}.ip:disabled{color:#9aa6b7;cursor:default}.hint{height:17px;margin-top:4px;color:var(--muted);font-size:11px}.details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.detail{min-width:0;border-top:1px solid var(--line);padding-top:9px}.label{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}.value{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.summary{border:0;background:linear-gradient(145deg,#176fd9,#0d5fc5);color:#fff}.summary .icon{background:#ffffff24}.summary .sub{color:#cfe2ff}.mode{font-size:22px;font-weight:750;margin:5px 0 8px}.desc{font-size:13px;line-height:1.65;color:#e4efff;margin:0}.signals{display:grid;gap:7px;margin-top:13px;padding-top:12px;border-top:1px solid #ffffff2e;font-size:12px}.signals div:before{content:"✓";margin-right:7px}.protocols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.protocol{padding:13px;border-radius:15px;background:#f7f9fc;font-size:12px;font-weight:700}.proto-ip{margin:8px 0 0;color:var(--muted);font:11px/1.45 ui-monospace,monospace;overflow-wrap:anywhere}.dot{float:right;width:8px;height:8px;border-radius:50%;background:#c5ccd7}.dot.on{background:var(--green)}.retry{width:100%;border:0;border-radius:16px;padding:14px;background:#172033;color:#fff;font-weight:700;font-size:14px;cursor:pointer}.retry:disabled{opacity:.55;cursor:wait}.foot{text-align:center;color:var(--muted);font-size:11px;line-height:1.65;margin:18px 10px 0}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,15px);background:#172033ed;color:#fff;border-radius:99px;padding:9px 15px;font-size:12px;opacity:0;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><main class="app"><header class="hero"><div class="logo">🌐</div><h1>网络出口检测</h1><p>比较不同目标实际看到的公网出口</p></header><section class="stack" id="cards"></section><footer class="foot">所有检测均由浏览器直接向第三方探针发起，本站没有后端，也不保存您的 IP 或网络信息。<br>结果仅用于辅助观察分流，不代表对代理规则的精确识别。</footer></main><div class="toast" id="toast">IP 已复制</div>
+<script>
+'use strict';const TIMEOUT=5000,$=s=>document.querySelector(s),results={};
+const META={current:['◎','当前出口','Cloudflare 边缘网络'],cn:['🇨🇳','国内线路','优先请求中国大陆服务'],global:['🌍','国际线路','独立国际 IP 服务'],special:['🔀','特殊线路','不同域名，用于观察特殊规则']};
+$('#cards').innerHTML=Object.entries(META).map(([k,m])=>`<article class="card" data-card="${k}"><div class="head"><div class="icon">${m[0]}</div><div class="title"><h2>${m[1]}</h2><p class="sub">${m[2]}</p></div><span class="status loading">检测中</span></div><button class="ip" disabled>正在获取…</button><div class="hint"></div><div class="details"><div class="detail"><span class="label">国家 / 地区</span><span class="value" data-f="location">—</span></div><div class="detail"><span class="label">运营商 / 节点</span><span class="value" data-f="isp">—</span></div><div class="detail"><span class="label">ASN / 协议</span><span class="value" data-f="asn">—</span></div><div class="detail"><span class="label">HTTP 延迟</span><span class="value" data-f="latency">—</span></div></div></article>`).join('')+`<article class="card summary"><div class="head"><div class="icon">⌁</div><div class="title"><h2>网络模式</h2><p class="sub">仅根据出口 IP 差异推测</p></div></div><div class="mode" id="mode">等待检测结果</div><p class="desc" id="desc">三个线路完成后展示初步判断。</p><div class="signals" id="signals"></div></article><article class="card"><div class="head"><div class="icon">↔</div><div class="title"><h2>IP 协议</h2><p class="sub">当前浏览器连通性</p></div></div><div class="protocols"><div class="protocol">IPv4 <span class="dot" id="v4dot"></span><p class="proto-ip" id="v4">检测中…</p></div><div class="protocol">IPv6 <span class="dot" id="v6dot"></span><p class="proto-ip" id="v6">检测中…</p></div></div></article><button class="retry" id="retry">重新检测</button>`;
+function trace(t){const d={};t.trim().split('\n').forEach(x=>{let i=x.indexOf('=');if(i>0)d[x.slice(0,i)]=x.slice(i+1)});return{ip:d.ip,countryCode:d.loc,colo:d.colo,http:d.http}}
+function ipip(d){const a=d.data?.location||[];return{ip:d.data?.ip,country:a[0],region:a[1],city:a[2],isp:a[4]}}
+function ipipText(t){return{ip:t.match(/([0-9a-f]*:[0-9a-f:.]+|(?:\d{1,3}\.){3}\d{1,3})/i)?.[1],location:t.split(/来自于[:：]/)[1]?.trim()}}
+function ipinfo(d){let o=d.org||'';return{ip:d.ip,countryCode:d.country,region:d.region,city:d.city,asn:o.match(/^AS\d+/)?.[0],isp:o.replace(/^AS\d+\s*/,'')}}
+function ipwho(d){if(d.success===false)throw Error(d.message);return{ip:d.ip,country:d.country,countryCode:d.country_code,region:d.region,city:d.city,asn:d.connection?.asn?`AS${d.connection.asn}`:'',isp:d.connection?.isp||d.connection?.org}}
+const PROBES={cn:[['https://myip.ipip.net/json','json',ipip,'IPIP JSON'],['https://myip.ipip.net','text',ipipText,'IPIP 文本'],['https://ipinfo.io/json','json',ipinfo,'IPInfo']],global:[['https://api64.ipify.org?format=json','json',d=>({ip:d.ip}),'ipify'],['https://ident.me/.json','json',d=>({ip:d.address}),'ident.me'],['https://icanhazip.com','text',t=>({ip:t.trim()}),'icanhazip']],special:[['https://ifconfig.me/all.json','json',d=>({ip:d.ip_addr}),'ifconfig.me'],['https://ipwho.is/','json',ipwho,'ipwho.is'],['https://www.cloudflare.com/cdn-cgi/trace','text',trace,'Cloudflare fallback']]};
+async function get(url,type='json',timeout=TIMEOUT){let c=new AbortController(),timer=setTimeout(()=>c.abort(),timeout),start=performance.now();try{let u=url+(url.includes('?')?'&':'?')+'_='+Date.now()+Math.random(),r=await fetch(u,{signal:c.signal,cache:'no-store'});if(!r.ok)throw Error(`HTTP ${r.status}`);return{data:type==='text'?await r.text():await r.json(),latency:Math.round(performance.now()-start)}}finally{clearTimeout(timer)}}
+async function list(k){let last;for(const [u,t,p,n] of PROBES[k])try{let x=await get(u,t),r={...p(x.data),latency:x.latency,source:n};if(!r.ip)throw Error('无有效 IP');console.log(`[${k.toUpperCase()} Probe]`,r);return r}catch(e){last=e;console.warn(`[${k.toUpperCase()} Probe] ${n}`,e)}throw last}
+async function enrich(r){if(r.country||r.countryCode||r.location)return r;try{let x=await get('https://ipwho.is/'+encodeURIComponent(r.ip));return{...ipwho(x.data),...r}}catch{return r}}
+function country(c){try{return new Intl.DisplayNames(['zh-CN'],{type:'region'}).of(c)}catch{return c||''}}function loc(r){return r.location||[country(r.countryCode)||r.country,r.region,r.city].filter((x,i,a)=>x&&a.indexOf(x)===i).join(' · ')||'未知'}
+function loading(k){let c=$(`[data-card="${k}"]`);c.querySelector('.status').className='status loading';c.querySelector('.status').textContent='检测中';c.querySelector('.ip').textContent='正在获取…';c.querySelector('.ip').disabled=true;c.querySelector('.hint').textContent='';c.querySelectorAll('[data-f]').forEach(x=>x.textContent='—')}
+function paint(k,r){let c=$(`[data-card="${k}"]`),s=c.querySelector('.status'),b=c.querySelector('.ip');s.className='status ok';s.textContent='已完成';b.textContent=r.ip;b.dataset.ip=r.ip;b.disabled=false;c.querySelector('.hint').textContent=`点击复制 · ${r.source}`;let put=(f,v)=>c.querySelector(`[data-f="${f}"]`).textContent=v||'—';put('location',loc(r));put('isp',r.isp||r.colo);put('asn',r.asn||r.http?.toUpperCase());put('latency',r.latency+' ms')}
+function fail(k,e){let c=$(`[data-card="${k}"]`),s=c.querySelector('.status');s.className='status error';s.textContent=e?.name==='AbortError'?'超时':'失败';c.querySelector('.ip').textContent='探针不可用';c.querySelector('.ip').disabled=true;c.querySelector('.hint').textContent='其他检测不受影响'}
+function summary(){let a=results.cn?.ip,b=results.global?.ip,c=results.special?.ip,title='检测数据不足',desc='部分线路探针不可用，暂不进行分流推断。',sig=[],fam=x=>x?.includes(':')?'IPv6':'IPv4';if(a&&b&&c){if(new Set([fam(a),fam(b),fam(c)]).size>1){title='检测数据不足';desc='线路探针返回了不同 IP 协议，无法可靠比较出口。';sig=['请参考各线路原始结果','重新检测后协议可能一致']}else{let ab=a===b,bc=b===c,ac=a===c;if(ab&&bc){title='单出口模式';desc='国内、国际和特殊目标当前使用相同公网出口。';sig=['三个线路出口 IP 一致','这不等同于“未开启代理”']}else if(!ab&&bc){title='疑似国内直连 / 国际代理';desc='国内目标和国际目标使用不同出口，国际与特殊目标出口一致。';sig=['国内线路与国际线路出口不同','国际与特殊线路出口一致']}else if(ab&&!bc){title='疑似特殊流量代理';desc='国内与国际目标出口一致，特殊目标使用另一出口。';sig=['国内与国际线路出口一致','特殊线路出口不同']}else if(!ab&&!bc&&!ac){title='多出口 / 多节点模式';desc='三个目标分别使用了不同的公网出口。';sig=['三个线路出口 IP 均不同']}else{title='双出口模式';desc='两个线路共享出口，另一个线路使用不同出口。';sig=['检测到两个不同公网出口']}}}$('#mode').textContent=title;$('#desc').textContent=desc;$('#signals').innerHTML=sig.map(x=>`<div>${x}</div>`).join('')}
+async function proto(urls,id){for(const [url,key,type='json'] of urls)try{let x=await get(url,type),ip=type==='text'?x.data.trim():x.data[key];if(!ip)throw 0;$(`#${id}`).textContent=ip;$(`#${id}dot`).className='dot on';return}catch{}let fallback=Object.values(results).find(r=>r.ip&&(id==='v6')===r.ip.includes(':'))?.ip;if(fallback){$(`#${id}`).textContent=fallback;$(`#${id}dot`).className='dot on'}else{$(`#${id}`).textContent='未检测到';$(`#${id}dot`).className='dot'}}
+async function detect(){Object.keys(META).forEach(loading);Object.keys(results).forEach(k=>delete results[k]);$('#retry').disabled=true;$('#retry').textContent='检测中…';$('#mode').textContent='正在分析…';$('#desc').textContent='等待各线路探针返回结果。';$('#signals').innerHTML='';let jobs={current:get('https://www.cloudflare.com/cdn-cgi/trace','text').then(x=>({...trace(x.data),latency:x.latency,source:'Cloudflare Trace'})),cn:list('cn').then(enrich),global:list('global').then(enrich),special:list('special').then(enrich)};await Promise.all(Object.entries(jobs).map(async([k,p])=>{try{results[k]=await p;paint(k,results[k])}catch(e){fail(k,e)}}));summary();await Promise.allSettled([proto([['https://api4.ipify.org?format=json','ip'],['https://ipv4.icanhazip.com','ip','text']], 'v4'),proto([['https://api6.ipify.org?format=json','ip'],['https://v6.ident.me/.json','address']], 'v6')]);$('#retry').disabled=false;$('#retry').textContent='重新检测'}
+document.addEventListener('click',async e=>{let b=e.target.closest('.ip');if(b&&!b.disabled){try{await navigator.clipboard.writeText(b.dataset.ip);let t=$('#toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400)}catch{}}});$('#retry').onclick=detect;detect();
+</script></body></html>
