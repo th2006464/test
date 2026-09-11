@@ -13,7 +13,7 @@
 - 国内线路：优先访问中国大陆 IP 服务，并提供 fallback。
 - 国际线路：通过独立国际 IP 服务观察该域名规则的出口。
 - Google 可达性：实际连接 Google 官方域名，显示成功/失败和 HTTP 耗时。
-- Google 规则出口：通过与 `ip111.cn` 相同的规则域名，观察该类域名可能命中的代理出口。
+- Google线路：通过与 `ip111.cn` 相同的规则域名，观察该类域名可能命中的代理出口。
 - IPv4 / IPv6：分别检测两种协议的浏览器连通性。
 - 模式提示：仅在结果具备可比性时判断同出口或疑似规则分流。
 
@@ -27,7 +27,7 @@
 | 国内线路 | `myip.ipip.net/json` | IPIP 文本接口、IPInfo |
 | 国际线路 | `api64.ipify.org` | ident.me、icanhazip |
 | Google 可达性 | `www.google.com/generate_204` | 只检测实际连接，不回显出口 IP |
-| Google 规则出口 | `sspanel.net/cdn-cgi/trace` | 第三方规则域名参考 |
+| Google线路 | `sspanel.net/cdn-cgi/trace` | 第三方规则域名参考 |
 | IPv4 / IPv6 | `api4.ipify.org` / `api6.ipify.org` | 协议对应 fallback |
 | IP 地理信息 | `ipwho.is/{ip}` | 失败时只显示 IP |
 
@@ -47,7 +47,7 @@ https://www.google.com/generate_204
 
 请求完成说明浏览器当时可以连接 Google，并可记录 HTTP 耗时；失败或超时则显示不可用。该端点不返回访问者 IP，浏览器也不能从连接中直接读取 NAT/代理出口，因此本面板不会虚构“Google 出口 IP”。
 
-### Google 规则出口（参考）
+### Google线路（参考）
 
 `ip111.cn` 的“从谷歌测试”并非请求 Google 官方 IP 回显，而是通过 iframe 加载：
 
@@ -70,7 +70,7 @@ Trace 返回浏览器访问 `sspanel.net` 时的公网 IP、国家、Cloudflare 
 - 国内与国际 IP 相同：只显示“同出口”，不解释为“没有代理”。
 - 国内与国际 IP 不同：显示“疑似规则分流”，不宣称识别了具体规则。
 - 两个探针返回不同协议（一个 IPv4、一个 IPv6）：显示数据不足，不直接比较。
-- Google 规则出口不参与国内/国际模式的强制判断，只作为独立参考。
+- Google线路不参与国内/国际模式的强制判断，只作为独立参考。
 
 ## 部署
 
